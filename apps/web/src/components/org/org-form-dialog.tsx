@@ -51,16 +51,24 @@ function FormBody({
     action,
     {},
   );
+  const message = (state as { message?: string }).message;
 
   useEffect(() => {
-    if (state.success) onSuccess();
-  }, [state.success, onSuccess]);
+    // Results with a message stay open so the user sees the impact
+    // (e.g. the real-time payroll previous → new figures).
+    if (state.success && !message) onSuccess();
+  }, [state.success, message, onSuccess]);
 
   return (
     <form action={formAction} className="flex flex-col gap-4">
       {state.error && (
         <Alert variant="destructive">
           <AlertDescription>{state.error}</AlertDescription>
+        </Alert>
+      )}
+      {state.success && message && (
+        <Alert>
+          <AlertDescription>{message}</AlertDescription>
         </Alert>
       )}
       {fields.map((field) => {

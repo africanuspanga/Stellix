@@ -60,7 +60,7 @@ Sprint 1 onward (SQL is written ahead of time and applied when they arrive).
 - Deterministic gross-to-net calculation with full trace
 - Golden-file test suite for payroll formulas
 
-## Sprint 8 — Payroll operations (Phase Four, part 2)
+## Sprint 8 — Payroll operations (Phase Four, part 2) ✅ (done 2026-07-08)
 - Payroll runs + state machine (Draft → … → Closed), immutable after approval
 - Real-time payroll workspace (change an input, see the impact instantly)
 - Variance engine
