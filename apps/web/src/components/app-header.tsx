@@ -6,12 +6,21 @@ import { Separator } from "@/components/ui/separator";
 import { AppBreadcrumbs } from "@/components/app-breadcrumbs";
 import { CustomSidebarTrigger } from "@/components/custom-sidebar-trigger";
 import { navLinks } from "@/components/app-shared";
-import { NavUser } from "@/components/nav-user";
+import { NavUser, type NavUserInfo } from "@/components/nav-user";
+import { TenantSwitcher, type TenantOption } from "@/components/tenant-switcher";
 import { SendIcon, BellIcon } from "lucide-react";
 
 const activeItem = navLinks.find((item) => item.isActive);
 
-export function AppHeader() {
+export function AppHeader({
+  user,
+  tenants,
+  activeTenantId,
+}: {
+  user: NavUserInfo;
+  tenants: TenantOption[];
+  activeTenantId: string | null;
+}) {
 	return (
 		<header
 			className={cn(
@@ -27,6 +36,7 @@ export function AppHeader() {
 				<AppBreadcrumbs page={activeItem} />
 			</div>
 			<div className="flex items-center gap-3">
+				<TenantSwitcher activeTenantId={activeTenantId} tenants={tenants} />
 				<Button size="icon-sm" variant="outline">
 					<SendIcon
 					/>
@@ -39,7 +49,7 @@ export function AppHeader() {
 					className="h-4 data-[orientation=vertical]:self-center"
 					orientation="vertical"
 				/>
-				<NavUser />
+				<NavUser user={user} />
 			</div>
 		</header>
 	);

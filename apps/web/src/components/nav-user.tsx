@@ -15,15 +15,15 @@ import {
 	DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { UserIcon, BellIcon, CommandIcon, LifeBuoyIcon, GraduationCapIcon, CreditCardIcon, LogOutIcon } from "lucide-react";
+import { signOut } from "@/app/(auth)/actions";
 
-// Placeholder until Supabase Auth is wired (Sprint 1).
-const user = {
-	name: "Africanus Panga",
-	email: "africanuspanga@gmail.com",
-	avatar: "",
-};
+export interface NavUserInfo {
+	name: string;
+	email: string;
+	avatar?: string;
+}
 
-export function NavUser() {
+export function NavUser({ user }: { user: NavUserInfo }) {
 	return (
 		<DropdownMenu>
 			<DropdownMenuTrigger render={<Avatar className="size-8" />}><AvatarImage src={user.avatar} /><AvatarFallback>{user.name.charAt(0)}</AvatarFallback></DropdownMenuTrigger>
@@ -90,6 +90,7 @@ export function NavUser() {
 					<DropdownMenuItem
 						className="w-full cursor-pointer"
 						variant="destructive"
+						onClick={() => void signOut()}
 					>
 						<LogOutIcon
 						/>

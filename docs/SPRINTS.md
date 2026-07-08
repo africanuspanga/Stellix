@@ -4,14 +4,14 @@ Blueprint v2 mapped into executable sprints. Each sprint ends with working,
 verifiable software. Sprints assume Supabase credentials are available from
 Sprint 1 onward (SQL is written ahead of time and applied when they arrive).
 
-## Sprint 0 — Foundation scaffold ✅ (current)
+## Sprint 0 — Foundation scaffold ✅ (done 2026-07-08)
 - Monorepo (pnpm workspaces): `apps/web`, `packages/*`
 - Next.js + TypeScript + Tailwind app shell
 - Environment configuration (`.env.example`: Supabase, Moonshot Kimi)
 - SQL migrations authored for tenancy, identity, org, people foundation
 - Sprint roadmap + engineering conventions (CLAUDE.md)
 
-## Sprint 1 — Platform foundation (Phase One)
+## Sprint 1 — Platform foundation (Phase One) ✅ (done 2026-07-08)
 - Apply migrations to Supabase (needs credentials)
 - Supabase Auth wiring: sign-in, session, protected routes
 - Tenancy: platform owner → partner → tenant → legal entity hierarchy
