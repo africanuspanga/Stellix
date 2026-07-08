@@ -1,0 +1,9 @@
+{
+  "name": "@hr/ai",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Moonshot Kimi client — AI explains HR/payroll data, never calculates it",
+  "type": "module",
+  "main": "src/index.ts",
+  "types": "src/index.ts"
+}

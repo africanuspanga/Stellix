@@ -1,0 +1,9 @@
+{
+  "name": "@hr/database",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Supabase SQL migrations and generated database types",
+  "scripts": {
+    "migrate": "./scripts/migrate.sh"
+  }
+}
