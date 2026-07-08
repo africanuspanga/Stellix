@@ -46,7 +46,7 @@ Sprint 1 onward (SQL is written ahead of time and applied when they arrive).
 - Workflow engine v1 (reusable approvals: sequential, delegation, escalation)
 - Employee/manager leave requests + team calendar
 
-## Sprint 6 — Attendance & shifts (Phase Three, part 2)
+## Sprint 6 — Attendance & shifts (Phase Three, part 2) ✅ (done 2026-07-08)
 - Shift configuration + rostering
 - Raw attendance events vs processed daily attendance (recalculable)
 - Mobile web check-in with geolocation/geofence
