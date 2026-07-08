@@ -30,6 +30,24 @@ const STATUS_VARIANT: Record<string, "default" | "secondary" | "outline" | "dest
   rejected: "destructive",
 };
 
+// SLA breach detection needs the request-time clock; kept outside the
+// component so rendering itself stays pure.
+function collectOverdueStepIds(
+  steps: Array<{ id: unknown; sla_hours: unknown; created_at: unknown }>,
+): Set<string> {
+  const nowMs = Date.now();
+  return new Set(
+    steps
+      .filter(
+        (s) =>
+          s.sla_hours &&
+          nowMs - new Date(s.created_at as string).getTime() >
+            (s.sla_hours as number) * 3_600_000,
+      )
+      .map((s) => s.id as string),
+  );
+}
+
 export default async function LeavePage() {
   const supabase = await createClient();
   const context = await getTenancyContext();
@@ -65,18 +83,7 @@ export default async function LeavePage() {
     (s) =>
       (s.workflow_instances as { entity_type: string }).entity_type === "leave_request",
   );
-  // Precompute SLA breaches so no clock reads happen inside JSX rendering.
-  const nowMs = Date.now();
-  const overdueStepIds = new Set(
-    leaveSteps
-      .filter(
-        (s) =>
-          s.sla_hours &&
-          nowMs - new Date(s.created_at as string).getTime() >
-            (s.sla_hours as number) * 3_600_000,
-      )
-      .map((s) => s.id as string),
-  );
+  const overdueStepIds = collectOverdueStepIds(leaveSteps);
   const requestById = new Map((requests ?? []).map((r) => [r.id as string, r]));
 
   const { data: balances } = await supabase
