@@ -46,8 +46,10 @@ export function createKimiClient(config?: Partial<KimiConfig>) {
       body: JSON.stringify({
         model,
         messages,
-        temperature: options.temperature ?? 0.3,
-        max_tokens: options.maxTokens ?? 1024,
+        // kimi-k2.6 rejects any temperature other than its default — only
+        // send the parameter when a caller explicitly sets it.
+        ...(options.temperature !== undefined ? { temperature: options.temperature } : {}),
+        max_tokens: options.maxTokens ?? 2048,
       }),
       signal: options.signal,
     });

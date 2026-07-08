@@ -23,7 +23,7 @@ export interface FieldOption {
 export interface FieldDef {
   name: string;
   label: string;
-  type?: "text" | "number" | "date" | "select" | "hidden";
+  type?: "text" | "number" | "date" | "select" | "textarea" | "hidden";
   options?: FieldOption[];
   /** For selects: adds a "none" choice with this label mapping to ''. */
   emptyOption?: string;
@@ -103,6 +103,15 @@ function FormBody({
                   </option>
                 ))}
               </select>
+            ) : field.type === "textarea" ? (
+              <textarea
+                className={`${selectClass} h-40 py-2`}
+                defaultValue={String(value)}
+                id={field.name}
+                name={field.name}
+                placeholder={field.placeholder}
+                required={field.required}
+              />
             ) : (
               <Input
                 defaultValue={String(value)}

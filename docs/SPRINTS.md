@@ -74,12 +74,12 @@ Sprint 1 onward (SQL is written ahead of time and applied when they arrive).
 - Notifications: in-app + email (Supabase), English & Swahili templates
 - HR service desk v1
 
-## Sprint 10 — WhatsApp self-service
+## Sprint 10 — WhatsApp self-service ⏸ (deferred — reshaped to invite links + Huduma launcher; Cloud API bot awaits Meta account)
 - WhatsApp Business API integration
 - Structured Swahili/English menus (payslip, leave balance, apply, shifts, loans)
 - Validated transactional workflows (no free-form AI for transactions)
 
-## Sprint 11 — AI intelligence (Phase Seven, first slice)
+## Sprint 11 — AI intelligence (Phase Seven, first slice) ✅ (done 2026-07-08)
 - Moonshot Kimi (kimi-k2.6) integration via `packages/ai`
 - Policy assistant (permission-aware retrieval, tenant-isolated, pgvector)
 - Payroll explanation assistant ("why did my net pay change?") — explains,

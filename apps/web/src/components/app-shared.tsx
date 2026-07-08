@@ -137,7 +137,7 @@ export const navGroups: SidebarNavGroup[] = [
 			},
 			{
 				title: "AI assistant",
-				path: "#/ai/assistant",
+				path: "/dashboard/ai",
 				icon: <SparklesIcon />,
 			},
 		],
@@ -152,6 +152,7 @@ export const navGroups: SidebarNavGroup[] = [
 					{ title: "Company", path: "#/settings/company" },
 					{ title: "Team & roles", path: "#/settings/team" },
 					{ title: "Workflows", path: "/dashboard/settings/workflows" },
+					{ title: "Policies", path: "/dashboard/settings/policies" },
 					{ title: "Billing", path: "#/settings/billing" },
 				],
 			},
