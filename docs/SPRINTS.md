@@ -39,7 +39,7 @@ Sprint 1 onward (SQL is written ahead of time and applied when they arrive).
 - Import centre: Excel/CSV → map → validate → dry run → import → reconcile
   (employees, contracts, bank details, leave balances)
 
-## Sprint 5 — Leave (Phase Three, part 1)
+## Sprint 5 — Leave & workflow engine (Phase Three, part 1) ✅ (done 2026-07-08)
 - Leave types, policies, periods, holiday calendars
 - Leave transaction ledger (not balance-only)
 - Accrual, carry-forward, encashment

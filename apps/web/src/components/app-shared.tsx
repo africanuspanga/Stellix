@@ -75,8 +75,10 @@ export const navGroups: SidebarNavGroup[] = [
 				title: "Time",
 				icon: <ClockIcon />,
 				subItems: [
+					{ title: "Leave", path: "/dashboard/time/leave" },
+					{ title: "Leave types", path: "/dashboard/time/leave/types" },
+					{ title: "Holidays", path: "/dashboard/time/holidays" },
 					{ title: "Attendance", path: "#/time/attendance" },
-					{ title: "Leave", path: "#/time/leave" },
 					{ title: "Shifts & roster", path: "#/time/roster" },
 					{ title: "Timesheets", path: "#/time/timesheets" },
 				],
@@ -136,7 +138,7 @@ export const navGroups: SidebarNavGroup[] = [
 				subItems: [
 					{ title: "Company", path: "#/settings/company" },
 					{ title: "Team & roles", path: "#/settings/team" },
-					{ title: "Workflows", path: "#/settings/workflows" },
+					{ title: "Workflows", path: "/dashboard/settings/workflows" },
 					{ title: "Billing", path: "#/settings/billing" },
 				],
 			},
