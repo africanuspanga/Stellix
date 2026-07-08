@@ -53,7 +53,7 @@ Sprint 1 onward (SQL is written ahead of time and applied when they arrive).
 - Attendance corrections + overtime approval
 - Timesheets v1
 
-## Sprint 7 — Payroll engine core (Phase Four, part 1)
+## Sprint 7 — Payroll engine core (Phase Four, part 1) ✅ (done 2026-07-08)
 - Pay components, salary structures, payroll groups
 - Effective-dated statutory rule engine (no hard-coded rates)
 - Tanzania Mainland compliance pack: PAYE, NSSF pension, SDL, WCF, minimum wage

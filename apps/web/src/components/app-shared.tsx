@@ -92,10 +92,11 @@ export const navGroups: SidebarNavGroup[] = [
 				title: "Payroll",
 				icon: <BanknoteIcon />,
 				subItems: [
+					{ title: "Calculator", path: "/dashboard/payroll/calculator" },
+					{ title: "Pay components", path: "/dashboard/payroll/components" },
 					{ title: "Payroll runs", path: "#/payroll/runs" },
 					{ title: "Payslips", path: "#/payroll/payslips" },
 					{ title: "Loans & advances", path: "#/payroll/loans" },
-					{ title: "Payments", path: "#/payroll/payments" },
 				],
 			},
 		],
