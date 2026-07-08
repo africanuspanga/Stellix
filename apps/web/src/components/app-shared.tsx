@@ -74,7 +74,9 @@ export const navGroups: SidebarNavGroup[] = [
 					{ title: "Onboarding", path: "/dashboard/people/onboarding" },
 					{ title: "Probation", path: "/dashboard/people/probation" },
 					{ title: "Import centre", path: "/dashboard/import" },
-					{ title: "Recruitment", path: "#/people/recruitment" },
+					{ title: "Recruitment", path: "/dashboard/people/recruitment" },
+					{ title: "Performance", path: "/dashboard/people/performance" },
+					{ title: "Offboarding", path: "/dashboard/people/offboarding" },
 				],
 			},
 			{

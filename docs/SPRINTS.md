@@ -93,7 +93,7 @@ Sprint 1 onward (SQL is written ahead of time and applied when they arrive).
 - HR partner portal (multi-client switching, managed payroll)
 - Data protection controls (consent, retention, access requests)
 
-## Sprint 13+ — Talent & relations (Phase Six)
+## Sprint 13 — Talent: recruitment, performance, offboarding ✅ (done 2026-07-08; learning/relations/safety remain Phase Six backlog)
 - Recruitment pipeline, performance, learning, employee relations (restricted
   permissions), health & safety, offboarding workflow completion
 

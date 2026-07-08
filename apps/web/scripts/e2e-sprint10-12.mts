@@ -166,7 +166,7 @@ try {
 
   const { data: selfEmployee } = await clientNew.from('employees').select('id, user_id');
   check('new account linked to the employee record + tenant membership',
-    selfEmployee?.some((e) => e.id === emp1!.id && e.user_id === accepted.userId));
+    selfEmployee?.some((e) => e.id === emp1!.id && e.user_id === accepted.userId) ?? false);
   const { data: newRoles } = await clientNew
     .from('user_roles').select('roles(name)').eq('user_id', accepted.userId);
   const roleName = (Array.isArray(newRoles?.[0]?.roles) ? newRoles?.[0]?.roles[0] : newRoles?.[0]?.roles) as { name?: string } | undefined;
@@ -203,7 +203,7 @@ try {
   const { data: crossEmployees } = await clientA.from('employees').select('tenant_id');
   check('cross-client data resolvable per tenant for the overview',
     new Set((crossEmployees ?? []).map((e) => e.tenant_id)).size === 1 /* client2 has none yet */
-    && crossEmployees?.every((e) => e.tenant_id === tenantId));
+    && (crossEmployees?.every((e) => e.tenant_id === tenantId) ?? false));
 } finally {
   for (const runId of runIds) {
     await admin.from('payroll_runs').update({ status: 'reversed' }).eq('id', runId);
