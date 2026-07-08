@@ -512,10 +512,7 @@ const TZ_DEFAULT_LEAVE_TYPES = [
   { name: 'Unpaid leave', name_sw: 'Likizo bila malipo', code: 'UNPAID', annual_entitlement_days: 0, max_carry_forward_days: 0, accrual_method: 'annual_grant', is_paid: false, allow_negative_balance: true },
 ];
 
-export async function seedTanzaniaLeaveTypes(
-  _p: LeaveFormState,
-  _f: FormData,
-): Promise<LeaveFormState> {
+export async function seedTanzaniaLeaveTypes(): Promise<LeaveFormState> {
   const auth = await requirePermission('time.leave.approve');
   if ('error' in auth) return { error: auth.error };
   const { supabase, tenantId, user } = auth;

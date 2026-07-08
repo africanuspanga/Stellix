@@ -65,6 +65,18 @@ export default async function LeavePage() {
     (s) =>
       (s.workflow_instances as { entity_type: string }).entity_type === "leave_request",
   );
+  // Precompute SLA breaches so no clock reads happen inside JSX rendering.
+  const nowMs = Date.now();
+  const overdueStepIds = new Set(
+    leaveSteps
+      .filter(
+        (s) =>
+          s.sla_hours &&
+          nowMs - new Date(s.created_at as string).getTime() >
+            (s.sla_hours as number) * 3_600_000,
+      )
+      .map((s) => s.id as string),
+  );
   const requestById = new Map((requests ?? []).map((r) => [r.id as string, r]));
 
   const { data: balances } = await supabase
@@ -157,10 +169,7 @@ export default async function LeavePage() {
                 first_name: string; middle_name: string | null; last_name: string;
               } | null;
               const type = request.leave_types as { name: string } | null;
-              const overdue =
-                step.sla_hours &&
-                Date.now() - new Date(step.created_at as string).getTime() >
-                  (step.sla_hours as number) * 3_600_000;
+              const overdue = overdueStepIds.has(step.id as string);
               return (
                 <div
                   className="flex flex-wrap items-center justify-between gap-2 rounded-md border px-3 py-2"
