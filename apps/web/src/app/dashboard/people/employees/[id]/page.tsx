@@ -11,6 +11,7 @@ import {
   saveDependant,
   updateEmployeePersonal,
 } from "@/app/dashboard/people/employees/actions";
+import { generateInvite } from "@/app/dashboard/people/employees/invite-actions";
 import { OrgFormDialog, type FieldDef } from "@/components/org/org-form-dialog";
 import { DocumentUpload } from "@/components/people/document-upload";
 import { Badge } from "@/components/ui/badge";
@@ -225,6 +226,17 @@ export default async function EmployeeDetailPage({
           </p>
         </div>
         <div className="flex gap-2">
+          {!employee.user_id && (
+            <OrgFormDialog
+              action={generateInvite}
+              description="Creates a one-time link (valid 14 days). Share it via WhatsApp, SMS or print — the employee sets a password and lands in self-service."
+              fields={[{ name: "employee_id", type: "hidden", label: "", defaultValue: id }]}
+              submitLabel="Generate invite link"
+              title="Invite to portal"
+              triggerLabel="Invite to portal"
+              triggerVariant="outline"
+            />
+          )}
           <OrgFormDialog
             action={updateEmployeePersonal}
             fields={personalFields}

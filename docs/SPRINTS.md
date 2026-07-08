@@ -74,7 +74,7 @@ Sprint 1 onward (SQL is written ahead of time and applied when they arrive).
 - Notifications: in-app + email (Supabase), English & Swahili templates
 - HR service desk v1
 
-## Sprint 10 — WhatsApp self-service ⏸ (deferred — reshaped to invite links + Huduma launcher; Cloud API bot awaits Meta account)
+## Sprint 10 (reshaped) — Invite links & Huduma launcher ✅ (done 2026-07-08; Cloud API bot deferred until a Meta business account exists)
 - WhatsApp Business API integration
 - Structured Swahili/English menus (payslip, leave balance, apply, shifts, loans)
 - Validated transactional workflows (no free-form AI for transactions)
@@ -87,7 +87,7 @@ Sprint 1 onward (SQL is written ahead of time and applied when they arrive).
 - Payroll anomaly summaries on top of the variance engine
 - AI audit log (prompt, sources, tools, output, reviewer)
 
-## Sprint 12 — Compliance surface & partner portal
+## Sprint 12 — Compliance surface & partner portal ✅ (done 2026-07-08)
 - Compliance dashboard (contracts, permits, filings, minimum wage, hours)
 - Statutory filing tracker
 - HR partner portal (multi-client switching, managed payroll)
