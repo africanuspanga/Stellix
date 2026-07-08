@@ -33,7 +33,7 @@ Sprint 1 onward (SQL is written ahead of time and applied when they arrive).
 - Document engine v1 (upload, categories, expiry reminders — Supabase Storage)
 - Employment actions (promotion, transfer, adjustment…) with letters
 
-## Sprint 4 — Onboarding, probation & import centre
+## Sprint 4 — Onboarding, probation & import centre ✅ (done 2026-07-08)
 - Onboarding templates + task assignment
 - Probation reviews, confirmation workflow
 - Import centre: Excel/CSV → map → validate → dry run → import → reconcile
