@@ -23,7 +23,7 @@ export interface FieldOption {
 export interface FieldDef {
   name: string;
   label: string;
-  type?: "text" | "number" | "select" | "hidden";
+  type?: "text" | "number" | "date" | "select" | "hidden";
   options?: FieldOption[];
   /** For selects: adds a "none" choice with this label mapping to ''. */
   emptyOption?: string;

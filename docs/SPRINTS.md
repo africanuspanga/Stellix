@@ -25,7 +25,7 @@ Sprint 1 onward (SQL is written ahead of time and applied when they arrive).
 - Positions (approved/budgeted/vacant/occupied/frozen/abolished)
 - Org chart view
 
-## Sprint 3 — Employee records (Phase Two, part 2)
+## Sprint 3 — Employee records (Phase Two, part 2) ✅ (done 2026-07-08)
 - Central employee record (one record powers everything)
 - Effective-dated assignments (position, salary, department, manager)
 - Contracts + contract expiry tracking

@@ -46,7 +46,7 @@ export const navGroups: SidebarNavGroup[] = [
 				title: "People",
 				icon: <UsersIcon />,
 				subItems: [
-					{ title: "Employees", path: "#/people/employees" },
+					{ title: "Employees", path: "/dashboard/people/employees" },
 					{ title: "Onboarding", path: "#/people/onboarding" },
 					{ title: "Recruitment", path: "#/people/recruitment" },
 				],

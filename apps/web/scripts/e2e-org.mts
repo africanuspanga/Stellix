@@ -26,18 +26,20 @@ let userBId = '';
 let tenantId = '';
 
 try {
-  const { data: a } = await admin.auth.admin.createUser({
+  const { data: a, error: aErr } = await admin.auth.admin.createUser({
     email: `e2e-org-a-${stamp}@stellix-test.example.com`,
     password,
     email_confirm: true,
   });
-  userAId = a!.user.id;
-  const { data: b } = await admin.auth.admin.createUser({
+  if (aErr || !a.user) throw aErr ?? new Error('user A creation failed');
+  userAId = a.user.id;
+  const { data: b, error: bErr } = await admin.auth.admin.createUser({
     email: `e2e-org-b-${stamp}@stellix-test.example.com`,
     password,
     email_confirm: true,
   });
-  userBId = b!.user.id;
+  if (bErr || !b.user) throw bErr ?? new Error('user B creation failed');
+  userBId = b.user.id;
 
   const { tenantId: tid, legalEntityId } = await provisionTenant(admin, {
     userId: userAId,
