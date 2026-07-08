@@ -1,6 +1,8 @@
 import type { ReactNode } from "react";
 import {
 	LayoutGridIcon,
+	CircleUserIcon,
+	UsersRoundIcon,
 	UsersIcon,
 	Building2Icon,
 	ClockIcon,
@@ -36,6 +38,16 @@ export const navGroups: SidebarNavGroup[] = [
 				path: "/dashboard",
 				icon: <LayoutGridIcon />,
 				isActive: true,
+			},
+			{
+				title: "My space",
+				path: "/dashboard/me",
+				icon: <CircleUserIcon />,
+			},
+			{
+				title: "My team",
+				path: "/dashboard/team",
+				icon: <UsersRoundIcon />,
 			},
 		],
 	},
@@ -120,7 +132,7 @@ export const navGroups: SidebarNavGroup[] = [
 		items: [
 			{
 				title: "Service desk",
-				path: "#/experience/service-desk",
+				path: "/dashboard/experience/service-desk",
 				icon: <MessageSquareTextIcon />,
 			},
 			{

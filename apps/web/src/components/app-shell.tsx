@@ -3,17 +3,20 @@ import { AppHeader } from "@/components/app-header";
 import { AppSidebar } from "@/components/app-sidebar";
 import type { NavUserInfo } from "@/components/nav-user";
 import type { TenantOption } from "@/components/tenant-switcher";
+import type { NotificationItem } from "@/components/notifications-bell";
 
 export function AppShell({
 	children,
 	user,
 	tenants,
 	activeTenantId,
+	notifications = [],
 }: {
 	children: React.ReactNode;
 	user: NavUserInfo;
 	tenants: TenantOption[];
 	activeTenantId: string | null;
+	notifications?: NotificationItem[];
 }) {
 	return (
 		<div className="overflow-hidden">
@@ -22,6 +25,7 @@ export function AppShell({
 				<SidebarInset className="md:peer-data-[variant=inset]:ml-0">
 					<AppHeader
 						activeTenantId={activeTenantId}
+						notifications={notifications}
 						tenants={tenants}
 						user={user}
 					/>

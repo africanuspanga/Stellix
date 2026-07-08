@@ -6,6 +6,16 @@ import { requirePermission } from '@/lib/authz';
 import { logAudit } from '@/lib/audit';
 import { actOnStep, delegateStep, startWorkflow } from '@/lib/workflow/engine';
 import { calcWorkingDays } from '@/lib/leave/working-days';
+import { notify, type Locale } from '@/lib/notify';
+
+async function tenantLocale(supabase: SupabaseClient, tenantId: string): Promise<Locale> {
+  const { data } = await supabase
+    .from('tenants')
+    .select('default_locale')
+    .eq('id', tenantId)
+    .maybeSingle();
+  return (data?.default_locale as Locale) ?? 'en';
+}
 
 export interface LeaveFormState {
   error?: string;
@@ -207,6 +217,48 @@ export async function requestLeave(_p: LeaveFormState, f: FormData): Promise<Lea
     entityType: 'leave_request', entityId: request.id,
     after: { employee_id: employeeId, leave_type_id: leaveTypeId, start_date: startDate, end_date: endDate, days },
   });
+
+  // Notify the first approver (direct assignee, or every holder of the role).
+  const { data: firstStep } = await supabase
+    .from('workflow_step_actions')
+    .select('assigned_user_id, assigned_role_id, workflow_instances!inner(entity_id)')
+    .eq('status', 'pending')
+    .eq('workflow_instances.entity_id', request.id)
+    .limit(1)
+    .maybeSingle();
+  let approverIds: string[] = [];
+  if (firstStep?.assigned_user_id) {
+    approverIds = [firstStep.assigned_user_id as string];
+  } else if (firstStep?.assigned_role_id) {
+    const { data: holders } = await supabase
+      .from('user_roles')
+      .select('user_id')
+      .eq('tenant_id', tenantId)
+      .eq('role_id', firstStep.assigned_role_id)
+      .limit(10);
+    approverIds = (holders ?? []).map((h) => h.user_id as string);
+  }
+  const { data: empName } = await supabase
+    .from('employees')
+    .select('first_name, last_name')
+    .eq('id', employeeId)
+    .maybeSingle();
+  await notify(supabase, {
+    tenantId,
+    userIds: approverIds,
+    template: 'leave_submitted',
+    locale: await tenantLocale(supabase, tenantId),
+    params: {
+      employee: `${empName?.first_name ?? ''} ${empName?.last_name ?? ''}`.trim(),
+      days,
+      type: leaveType.name,
+      from: startDate,
+      to: endDate,
+    },
+    category: 'leave',
+    link: '/dashboard/time/leave',
+  });
+
   revalidatePath(PATH, 'layout');
   return { success: true };
 }
@@ -237,7 +289,7 @@ export async function decideLeaveStep(_p: LeaveFormState, f: FormData): Promise<
   if (result.status !== 'pending') {
     const { data: request } = await supabase
       .from('leave_requests')
-      .select('*')
+      .select('*, leave_types(name), employees(user_id)')
       .eq('id', requestId)
       .maybeSingle();
     if (request && request.status === 'pending') {
@@ -259,6 +311,19 @@ export async function decideLeaveStep(_p: LeaveFormState, f: FormData): Promise<
           created_by: user.id,
         });
       }
+
+      // Notify the requester and the employee (when they have portal access).
+      const employeeUser = (request.employees as { user_id?: string | null } | null)?.user_id;
+      const typeName = (request.leave_types as { name?: string } | null)?.name ?? 'leave';
+      await notify(supabase, {
+        tenantId,
+        userIds: [request.requested_by as string, employeeUser ?? ''].filter(Boolean),
+        template: result.status === 'approved' ? 'leave_approved' : 'leave_rejected',
+        locale: await tenantLocale(supabase, tenantId),
+        params: { type: typeName, from: request.start_date, to: request.end_date },
+        category: 'leave',
+        link: '/dashboard/me',
+      });
     }
   }
 

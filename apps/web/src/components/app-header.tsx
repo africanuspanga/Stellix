@@ -9,16 +9,19 @@ import { CustomSidebarTrigger } from "@/components/custom-sidebar-trigger";
 import { navLinks } from "@/components/app-shared";
 import { NavUser, type NavUserInfo } from "@/components/nav-user";
 import { TenantSwitcher, type TenantOption } from "@/components/tenant-switcher";
-import { SendIcon, BellIcon } from "lucide-react";
+import { NotificationsBell, type NotificationItem } from "@/components/notifications-bell";
+import { SendIcon } from "lucide-react";
 
 export function AppHeader({
   user,
   tenants,
   activeTenantId,
+  notifications = [],
 }: {
   user: NavUserInfo;
   tenants: TenantOption[];
   activeTenantId: string | null;
+  notifications?: NotificationItem[];
 }) {
 	const pathname = usePathname();
 	// Longest matching route wins, so /dashboard/organization/branches
@@ -49,10 +52,7 @@ export function AppHeader({
 					<SendIcon
 					/>
 				</Button>
-				<Button aria-label="Notifications" size="icon-sm" variant="outline">
-					<BellIcon
-					/>
-				</Button>
+				<NotificationsBell items={notifications} />
 				<Separator
 					className="h-4 data-[orientation=vertical]:self-center"
 					orientation="vertical"

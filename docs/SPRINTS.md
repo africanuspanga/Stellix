@@ -68,7 +68,7 @@ Sprint 1 onward (SQL is written ahead of time and applied when they arrive).
 - Payslips (PDF), bank/mobile-money export files, statutory schedules
 - Accounting journals + loans/advances with payroll deduction
 
-## Sprint 9 — Employee experience (Phase Five)
+## Sprint 9 — Employee experience (Phase Five) ✅ (done 2026-07-08)
 - Employee portal (payslips, leave, attendance, profile, requests)
 - Manager portal (approvals, team views, roster)
 - Notifications: in-app + email (Supabase), English & Swahili templates

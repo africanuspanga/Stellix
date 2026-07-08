@@ -23,7 +23,8 @@ export default async function PayslipPage({
   const supabase = await createClient();
   const context = await getTenancyContext();
   const [{ data: run }, { data: line }] = await Promise.all([
-    supabase.from("payroll_runs").select("*, legal_entities(name)").eq("id", id).maybeSingle(),
+    // Metadata view: readable by the employee themself, exposes no totals.
+    supabase.from("payslip_run_meta").select("*").eq("id", id).maybeSingle(),
     supabase
       .from("payroll_run_lines")
       .select("*")
@@ -52,7 +53,7 @@ export default async function PayslipPage({
             <LogoIcon className="size-5" />
             <div>
               <p className="font-bold leading-tight">
-                {(run.legal_entities as { name?: string } | null)?.name ?? context.activeTenant?.name}
+                {(run.entity_name as string | null) ?? context.activeTenant?.name}
               </p>
               <p className="text-xs text-muted-foreground">Payslip · {period}</p>
             </div>
