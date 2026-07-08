@@ -108,7 +108,7 @@ try {
     JSON.stringify(julyAfterBonus?.totals));
 
   // ── New hire mid-period → full recalc → variance engine ────────────────
-  const emp3 = await hire('EMP-0003', 'Chiku', 500_000);
+  await hire('EMP-0003', 'Chiku', 500_000);
   const julyOutcome = await calculateRunCore(client, julyRun as RunRow);
   check('July: 3 employees after new hire', julyOutcome.employees === 3);
   const types = julyOutcome.variances.map((v: VarianceFinding) => `${v.type}:${v.employeeName.split(' ')[0]}`);
