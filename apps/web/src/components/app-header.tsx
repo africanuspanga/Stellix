@@ -1,5 +1,6 @@
 "use client";
 
+import { usePathname } from "next/navigation";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
@@ -10,8 +11,6 @@ import { NavUser, type NavUserInfo } from "@/components/nav-user";
 import { TenantSwitcher, type TenantOption } from "@/components/tenant-switcher";
 import { SendIcon, BellIcon } from "lucide-react";
 
-const activeItem = navLinks.find((item) => item.isActive);
-
 export function AppHeader({
   user,
   tenants,
@@ -21,6 +20,15 @@ export function AppHeader({
   tenants: TenantOption[];
   activeTenantId: string | null;
 }) {
+	const pathname = usePathname();
+	// Longest matching route wins, so /dashboard/organization/branches
+	// resolves to "Branches" rather than "Overview".
+	const activeItem = navLinks
+		.filter((item) => item.path && !item.path.startsWith("#"))
+		.sort((a, b) => (b.path?.length ?? 0) - (a.path?.length ?? 0))
+		.find((item) => pathname === item.path || pathname.startsWith(`${item.path}/`))
+		?? navLinks.find((item) => item.isActive);
+
 	return (
 		<header
 			className={cn(

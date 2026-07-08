@@ -19,7 +19,7 @@ Sprint 1 onward (SQL is written ahead of time and applied when they arrive).
 - Audit log service (every write audited)
 - App shell: six-pillar navigation, tenant switcher
 
-## Sprint 2 — Organization & positions (Phase Two, part 1)
+## Sprint 2 — Organization & positions (Phase Two, part 1) ✅ (done 2026-07-08)
 - Branches, departments, cost centres, projects, work sites
 - Job families, grades, salary bands
 - Positions (approved/budgeted/vacant/occupied/frozen/abolished)

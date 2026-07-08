@@ -2,6 +2,7 @@ import type { ReactNode } from "react";
 import {
 	LayoutGridIcon,
 	UsersIcon,
+	Building2Icon,
 	ClockIcon,
 	BanknoteIcon,
 	ShieldCheckIcon,
@@ -46,9 +47,21 @@ export const navGroups: SidebarNavGroup[] = [
 				icon: <UsersIcon />,
 				subItems: [
 					{ title: "Employees", path: "#/people/employees" },
-					{ title: "Positions", path: "#/people/positions" },
 					{ title: "Onboarding", path: "#/people/onboarding" },
 					{ title: "Recruitment", path: "#/people/recruitment" },
+				],
+			},
+			{
+				title: "Organization",
+				icon: <Building2Icon />,
+				subItems: [
+					{ title: "Overview", path: "/dashboard/organization" },
+					{ title: "Branches", path: "/dashboard/organization/branches" },
+					{ title: "Departments", path: "/dashboard/organization/departments" },
+					{ title: "Cost centres", path: "/dashboard/organization/cost-centres" },
+					{ title: "Jobs & grades", path: "/dashboard/organization/job-grades" },
+					{ title: "Positions", path: "/dashboard/organization/positions" },
+					{ title: "Org chart", path: "/dashboard/organization/org-chart" },
 				],
 			},
 		],
