@@ -12,6 +12,7 @@ import {
   reverseRun,
 } from "@/app/dashboard/payroll/runs/actions";
 import { OrgFormDialog, type FieldDef } from "@/components/org/org-form-dialog";
+import { BulkInputUpload } from "@/components/payroll/bulk-input-upload";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
@@ -221,6 +222,7 @@ export default async function RunDetailPage({
             </span>
           )}
         </h2>
+        {editable && <BulkInputUpload runId={id} />}
         <Table>
           <TableHeader>
             <TableRow>

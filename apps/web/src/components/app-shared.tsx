@@ -163,6 +163,7 @@ export const navGroups: SidebarNavGroup[] = [
 				title: "Settings",
 				icon: <SettingsIcon />,
 				subItems: [
+					{ title: "Company profile", path: "/dashboard/settings/company" },
 					{ title: "Payslip branding", path: "/dashboard/settings/branding" },
 					{ title: "Team & roles", path: "#/settings/team" },
 					{ title: "Workflows", path: "/dashboard/settings/workflows" },
