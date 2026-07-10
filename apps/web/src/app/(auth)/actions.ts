@@ -28,6 +28,25 @@ export async function signIn(
   redirect(next.startsWith('/') ? next : '/dashboard');
 }
 
+/** One-click sign-in to the Driftmark Technologies demo workspace. The
+ *  credentials match scripts/seed-driftmark.mts (the seeded demo company) and
+ *  can be overridden via env for non-default demo environments. */
+export async function signInDemo(): Promise<AuthFormState> {
+  const email = process.env.DEMO_LOGIN_EMAIL ?? 'demo-admin@driftmark.co.tz';
+  const password = process.env.DEMO_LOGIN_PASSWORD ?? 'DriftmarkDemo2026!';
+
+  const supabase = await createClient();
+  const { error } = await supabase.auth.signInWithPassword({ email, password });
+  if (error) {
+    return {
+      error: `Demo sign-in failed — has the Driftmark demo seed been run? (${error.message})`,
+    };
+  }
+
+  revalidatePath('/', 'layout');
+  redirect('/dashboard');
+}
+
 export async function signUp(
   _prev: AuthFormState,
   formData: FormData,
