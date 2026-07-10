@@ -8,6 +8,7 @@ import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
   DropdownMenuContent,
+  DropdownMenuGroup,
   DropdownMenuItem,
   DropdownMenuLabel,
   DropdownMenuSeparator,
@@ -42,19 +43,22 @@ export function NotificationsBell({ items }: { items: NotificationItem[] }) {
         )}
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end" className="w-80">
-        <DropdownMenuLabel className="flex items-center justify-between">
-          Notifications
-          {unreadCount > 0 && (
-            <button
-              className="text-xs font-normal text-muted-foreground underline underline-offset-2 hover:text-foreground"
-              disabled={pending}
-              onClick={() => startTransition(() => markAllNotificationsRead())}
-              type="button"
-            >
-              mark all read
-            </button>
-          )}
-        </DropdownMenuLabel>
+        {/* Base UI: GroupLabel must live inside a Group or the menu crashes. */}
+        <DropdownMenuGroup>
+          <DropdownMenuLabel className="flex items-center justify-between">
+            Notifications
+            {unreadCount > 0 && (
+              <button
+                className="text-xs font-normal text-muted-foreground underline underline-offset-2 hover:text-foreground"
+                disabled={pending}
+                onClick={() => startTransition(() => markAllNotificationsRead())}
+                type="button"
+              >
+                mark all read
+              </button>
+            )}
+          </DropdownMenuLabel>
+        </DropdownMenuGroup>
         <DropdownMenuSeparator />
         {items.length === 0 && (
           <p className="px-3 py-4 text-center text-sm text-muted-foreground">

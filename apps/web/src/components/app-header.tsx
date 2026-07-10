@@ -2,7 +2,6 @@
 
 import { usePathname } from "next/navigation";
 import { cn } from "@/lib/utils";
-import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
 import { AppBreadcrumbs } from "@/components/app-breadcrumbs";
 import { CustomSidebarTrigger } from "@/components/custom-sidebar-trigger";
@@ -10,7 +9,7 @@ import { navLinks } from "@/components/app-shared";
 import { NavUser, type NavUserInfo } from "@/components/nav-user";
 import { TenantSwitcher, type TenantOption } from "@/components/tenant-switcher";
 import { NotificationsBell, type NotificationItem } from "@/components/notifications-bell";
-import { SendIcon } from "lucide-react";
+import { ThemeToggle } from "@/components/theme-toggle";
 
 export function AppHeader({
   user,
@@ -48,10 +47,7 @@ export function AppHeader({
 			</div>
 			<div className="flex items-center gap-3">
 				<TenantSwitcher activeTenantId={activeTenantId} tenants={tenants} />
-				<Button size="icon-sm" variant="outline">
-					<SendIcon
-					/>
-				</Button>
+				<ThemeToggle />
 				<NotificationsBell items={notifications} />
 				<Separator
 					className="h-4 data-[orientation=vertical]:self-center"

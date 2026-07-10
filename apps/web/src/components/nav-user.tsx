@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import {
 	Avatar,
 	AvatarFallback,
@@ -14,7 +15,7 @@ import {
 	DropdownMenuSeparator,
 	DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { UserIcon, BellIcon, CommandIcon, LifeBuoyIcon, GraduationCapIcon, CreditCardIcon, LogOutIcon } from "lucide-react";
+import { UserIcon, LogOutIcon } from "lucide-react";
 import { signOut } from "@/app/(auth)/actions";
 
 export interface NavUserInfo {
@@ -28,7 +29,8 @@ export function NavUser({ user }: { user: NavUserInfo }) {
 		<DropdownMenu>
 			<DropdownMenuTrigger render={<Avatar className="size-8" />}><AvatarImage src={user.avatar} /><AvatarFallback>{user.name.charAt(0)}</AvatarFallback></DropdownMenuTrigger>
 			<DropdownMenuContent align="end" className="w-60">
-				<DropdownMenuItem className="flex items-center justify-start gap-2">
+				{/* Base UI: GroupLabel must live inside a Group or the menu crashes. */}
+				<DropdownMenuGroup>
 					<DropdownMenuLabel className="flex items-center gap-3">
 						<Avatar className="size-10">
 							<AvatarImage src={user.avatar} />
@@ -42,47 +44,12 @@ export function NavUser({ user }: { user: NavUserInfo }) {
 							</div>
 						</div>
 					</DropdownMenuLabel>
-				</DropdownMenuItem>
-				<DropdownMenuSeparator />
-				<DropdownMenuGroup>
-					<DropdownMenuItem>
-						<UserIcon
-						/>
-						Profile
-					</DropdownMenuItem>
 				</DropdownMenuGroup>
 				<DropdownMenuSeparator />
 				<DropdownMenuGroup>
-					<DropdownMenuItem>
-						<BellIcon
-						/>
-						Notifications
-					</DropdownMenuItem>
-					<DropdownMenuItem>
-						<CommandIcon
-						/>
-						Keyboard shortcuts
-					</DropdownMenuItem>
-				</DropdownMenuGroup>
-				<DropdownMenuSeparator />
-				<DropdownMenuGroup>
-					<DropdownMenuItem>
-						<LifeBuoyIcon
-						/>
-						Help center
-					</DropdownMenuItem>
-					<DropdownMenuItem>
-						<GraduationCapIcon
-						/>
-						Training
-					</DropdownMenuItem>
-				</DropdownMenuGroup>
-				<DropdownMenuSeparator />
-				<DropdownMenuGroup>
-					<DropdownMenuItem>
-						<CreditCardIcon
-						/>
-						Subscription
+					<DropdownMenuItem render={<Link href="/dashboard/me" />}>
+						<UserIcon />
+						My profile
 					</DropdownMenuItem>
 				</DropdownMenuGroup>
 				<DropdownMenuSeparator />
@@ -92,8 +59,7 @@ export function NavUser({ user }: { user: NavUserInfo }) {
 						variant="destructive"
 						onClick={() => void signOut()}
 					>
-						<LogOutIcon
-						/>
+						<LogOutIcon />
 						Log out
 					</DropdownMenuItem>
 				</DropdownMenuGroup>
