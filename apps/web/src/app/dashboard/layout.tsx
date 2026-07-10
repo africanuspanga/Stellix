@@ -2,6 +2,7 @@ import { redirect } from "next/navigation";
 import { AppShell } from "@/components/app-shell";
 import { createClient } from "@/lib/supabase/server";
 import { getTenancyContext } from "@/lib/tenancy/context";
+import { isPlatformOwner } from "@/lib/platform/owner";
 
 export default async function DashboardLayout({
   children,
@@ -19,14 +20,18 @@ export default async function DashboardLayout({
     "User";
 
   const supabase = await createClient();
-  const { data: notificationRows } = await supabase
-    .from("notifications")
-    .select("id, title, body, link, read_at, created_at")
-    .order("created_at", { ascending: false })
-    .limit(10);
+  const [{ data: notificationRows }, owner] = await Promise.all([
+    supabase
+      .from("notifications")
+      .select("id, title, body, link, read_at, created_at")
+      .order("created_at", { ascending: false })
+      .limit(10),
+    isPlatformOwner(),
+  ]);
 
   return (
     <AppShell
+      isOwner={owner}
       activeTenantId={activeTenant?.id ?? null}
       notifications={(notificationRows ?? []).map((n) => ({
         id: n.id as string,

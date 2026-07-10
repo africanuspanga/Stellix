@@ -306,7 +306,14 @@ export async function createEmploymentAction(
       effective_from: effectiveDate,
       created_by_action_id: action.id,
     });
-    if (insertErr) return { error: `Assignment change failed: ${insertErr.message}` };
+    if (insertErr) {
+      // Reopen the previous row so the employee isn't left with no current
+      // assignment (which would silently drop them from payroll).
+      if (current) {
+        await supabase.from('employee_assignments').update({ effective_to: null }).eq('id', current.id);
+      }
+      return { error: `Assignment change failed: ${insertErr.message}` };
+    }
 
     // Position occupancy swap.
     if (newPositionId && current?.position_id && newPositionId !== current.position_id) {
@@ -340,7 +347,14 @@ export async function createEmploymentAction(
       effective_from: effectiveDate,
       created_by_action_id: action.id,
     });
-    if (compErr) return { error: `Salary change failed: ${compErr.message}` };
+    if (compErr) {
+      // Reopen the previous salary row so the employee isn't left with no
+      // current compensation (which pays them 0 with no warning).
+      if (currentComp) {
+        await supabase.from('employee_compensation').update({ effective_to: null }).eq('id', currentComp.id);
+      }
+      return { error: `Salary change failed: ${compErr.message}` };
+    }
   }
 
   await logAudit(supabase, {

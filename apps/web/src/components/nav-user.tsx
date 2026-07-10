@@ -15,7 +15,7 @@ import {
 	DropdownMenuSeparator,
 	DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { UserIcon, LogOutIcon } from "lucide-react";
+import { UserIcon, LogOutIcon, ShieldIcon } from "lucide-react";
 import { signOut } from "@/app/(auth)/actions";
 
 export interface NavUserInfo {
@@ -24,7 +24,7 @@ export interface NavUserInfo {
 	avatar?: string;
 }
 
-export function NavUser({ user }: { user: NavUserInfo }) {
+export function NavUser({ user, isOwner = false }: { user: NavUserInfo; isOwner?: boolean }) {
 	return (
 		<DropdownMenu>
 			<DropdownMenuTrigger render={<Avatar className="size-8" />}><AvatarImage src={user.avatar} /><AvatarFallback>{user.name.charAt(0)}</AvatarFallback></DropdownMenuTrigger>
@@ -51,6 +51,12 @@ export function NavUser({ user }: { user: NavUserInfo }) {
 						<UserIcon />
 						My profile
 					</DropdownMenuItem>
+					{isOwner && (
+						<DropdownMenuItem render={<Link href="/owner" />}>
+							<ShieldIcon />
+							Platform console
+						</DropdownMenuItem>
+					)}
 				</DropdownMenuGroup>
 				<DropdownMenuSeparator />
 				<DropdownMenuGroup>

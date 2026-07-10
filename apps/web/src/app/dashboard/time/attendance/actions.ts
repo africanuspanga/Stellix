@@ -156,14 +156,15 @@ export async function checkInOut(_p: AttendanceFormState, f: FormData): Promise<
     })),
   );
 
-  // Toggle: last event today decides whether this is an in or an out.
-  const dayStart = new Date();
-  dayStart.setUTCHours(0, 0, 0, 0);
+  // Toggle: last event of the local (EAT) day decides in vs out. Anchor the
+  // day to +03:00 so early-morning events aren't attributed to the wrong day.
+  const localDate = new Date(Date.now() + 3 * 60 * 60 * 1000).toISOString().slice(0, 10);
+  const dayStart = new Date(`${localDate}T00:00:00+03:00`).toISOString();
   const { data: lastEvent } = await supabase
     .from('attendance_events')
     .select('event_type')
     .eq('employee_id', employee.id)
-    .gte('event_time', dayStart.toISOString())
+    .gte('event_time', dayStart)
     .order('event_time', { ascending: false })
     .limit(1)
     .maybeSingle();
@@ -204,8 +205,13 @@ async function reprocessDay(
   employeeId: string,
   workDate: string,
 ): Promise<void> {
-  const dayStart = `${workDate}T00:00:00Z`;
-  const dayEnd = `${workDate}T23:59:59Z`;
+  // The work "day" is a local (EAT, UTC+3) calendar day, and a night shift's
+  // checkout lands the next morning — so fetch a 36h window from local midnight
+  // (else night shifts always read as missing_out and everyone's minutes shift
+  // by 3 hours).
+  const dayStartMs = new Date(`${workDate}T00:00:00+03:00`).getTime();
+  const dayStart = new Date(dayStartMs).toISOString();
+  const dayEnd = new Date(dayStartMs + 36 * 60 * 60 * 1000).toISOString();
 
   const [{ data: events }, { data: roster }, { data: leave }, { data: employee }] =
     await Promise.all([
@@ -354,8 +360,8 @@ export async function requestCorrection(
     tenant_id: tenantId,
     employee_id: employeeId,
     work_date: workDate,
-    corrected_in: correctedIn ? `${workDate}T${correctedIn}:00Z` : null,
-    corrected_out: correctedOut ? `${workDate}T${correctedOut}:00Z` : null,
+    corrected_in: correctedIn ? new Date(`${workDate}T${correctedIn}:00+03:00`).toISOString() : null,
+    corrected_out: correctedOut ? new Date(`${workDate}T${correctedOut}:00+03:00`).toISOString() : null,
     reason,
     requested_by: user.id,
   });

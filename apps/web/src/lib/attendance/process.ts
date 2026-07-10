@@ -36,9 +36,15 @@ export interface ProcessedDay {
   overtimeMinutes: number;
 }
 
+// Tanzania observes East Africa Time (UTC+3) year-round with no DST, so shift
+// wall-clock times ('08:00') are local and must be anchored to +03:00 before
+// comparing to the UTC event instants — otherwise every late/early figure is
+// off by three hours.
+export const EAT_OFFSET = '+03:00';
+
 function shiftBoundary(workDate: string, time: string, addDays = 0): number {
   const t = time.length === 5 ? `${time}:00` : time;
-  const d = new Date(`${workDate}T${t}Z`);
+  const d = new Date(`${workDate}T${t}${EAT_OFFSET}`);
   d.setUTCDate(d.getUTCDate() + addDays);
   return d.getTime();
 }

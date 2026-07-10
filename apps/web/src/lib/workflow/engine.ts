@@ -175,7 +175,9 @@ export async function actOnStep(
     throw new Error('You are not the assigned approver for this step.');
   }
 
-  const { error: stepError } = await supabase
+  // Guard on the still-pending state so two concurrent approvers cannot both
+  // act on the same step (which downstream double-writes the leave ledger).
+  const { data: actedStep, error: stepError } = await supabase
     .from('workflow_step_actions')
     .update({
       status: input.decision,
@@ -183,8 +185,12 @@ export async function actOnStep(
       acted_at: new Date().toISOString(),
       comment: input.comment ?? null,
     })
-    .eq('id', input.stepActionId);
+    .eq('id', input.stepActionId)
+    .eq('status', 'pending')
+    .select('id')
+    .maybeSingle();
   if (stepError) throw new Error(stepError.message);
+  if (!actedStep) throw new Error('This step was just decided by someone else.');
 
   const instanceId = step.instance_id as string;
   const { data: instance } = await supabase

@@ -57,7 +57,9 @@ export async function saveCycle(_p: PerformanceFormState, f: FormData): Promise<
 }
 
 export async function saveGoal(_p: PerformanceFormState, f: FormData): Promise<PerformanceFormState> {
-  const auth = await requirePermission('time.leave.request'); // any employee-level member
+  // Managing performance goals is a manager/HR function — base employees
+  // (people.employee.self only) must not create or edit anyone's goals.
+  const auth = await requirePermission('people.employee.read');
   if ('error' in auth) return { error: auth.error };
   const { supabase, tenantId, user } = auth;
 
@@ -79,6 +81,7 @@ export async function saveGoal(_p: PerformanceFormState, f: FormData): Promise<P
         .from('performance_goals')
         .update({ title: values.title, description: values.description, weight: values.weight, status: values.status })
         .eq('id', id)
+        .eq('tenant_id', tenantId)
     : await supabase
         .from('performance_goals')
         .insert({ tenant_id: tenantId, created_by: user.id, ...values });

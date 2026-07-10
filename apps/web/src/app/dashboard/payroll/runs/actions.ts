@@ -169,11 +169,17 @@ async function transition(
     return { error: `Cannot move a ${run.status} run to ${to}.` };
   }
 
-  const { error } = await supabase
+  // Guard the transition on the source status so two concurrent transitions
+  // (e.g. approve + reverse, or a double mark-paid) cannot both apply.
+  const { data: moved, error } = await supabase
     .from('payroll_runs')
     .update({ status: to, ...extra(user.id) })
-    .eq('id', runId);
+    .eq('id', runId)
+    .in('status', from)
+    .select('id')
+    .maybeSingle();
   if (error) return { error: error.message };
+  if (!moved) return { error: 'This run was just updated elsewhere — refresh and try again.' };
 
   await logAudit(supabase, {
     tenantId, actorUserId: user.id, action: `payroll_run.${to}`,

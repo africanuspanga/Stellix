@@ -53,21 +53,34 @@ async function loadEmployeeBundles(
   supabase: SupabaseClient,
   run: RunRow,
 ): Promise<EmployeeBundle[]> {
+  // Salary/components/hire status must reflect the state in force AT THE PERIOD
+  // END — not "whatever is currently open". Otherwise a raise entered mid-month
+  // effective next month is paid this month, and an employee hired next month is
+  // paid this month. The effective-dated invariant (non-overlapping rows, one
+  // open) means exactly one row per employee satisfies the period filter.
+  const mm = String(run.period_month).padStart(2, '0');
+  const lastDay = new Date(Date.UTC(run.period_year, run.period_month, 0)).getUTCDate();
+  const periodEnd = `${run.period_year}-${mm}-${String(lastDay).padStart(2, '0')}`;
+  const inForceAtPeriodEnd = `effective_to.is.null,effective_to.gte.${periodEnd}`;
+
   const [{ data: employees }, { data: compensation }, { data: assignments }, { data: banks }, { data: runInputs }] =
     await Promise.all([
       supabase
         .from('employees')
         .select('id, first_name, middle_name, last_name, employee_number')
         .eq('legal_entity_id', run.legal_entity_id)
-        .not('status', 'in', '("exited","exiting")'),
+        .not('status', 'in', '("exited","exiting")')
+        .lte('hire_date', periodEnd),
       supabase
         .from('employee_compensation')
         .select('employee_id, basic_salary')
-        .is('effective_to', null),
+        .lte('effective_from', periodEnd)
+        .or(inForceAtPeriodEnd),
       supabase
         .from('employee_pay_components')
         .select('employee_id, amount, pay_components(code, name, component_type, calc_type, default_amount, taxable, pensionable, is_active)')
-        .is('effective_to', null),
+        .lte('effective_from', periodEnd)
+        .or(inForceAtPeriodEnd),
       supabase
         .from('employee_bank_accounts')
         .select('employee_id, payment_method, bank_name, account_name, account_number, mobile_money_provider, mobile_money_number')
@@ -206,7 +219,14 @@ export async function calculateRunCore(
     ),
   }));
 
-  await supabase.from('payroll_run_lines').delete().eq('run_id', run.id);
+  // The DB immutability triggers (migration 0012) reject changes to an
+  // approved/paid/closed run's lines; check the delete error rather than
+  // swallowing it, so a concurrent approval can't leave the run line-less.
+  const { error: deleteError } = await supabase
+    .from('payroll_run_lines')
+    .delete()
+    .eq('run_id', run.id);
+  if (deleteError) throw new Error(`Could not clear existing lines: ${deleteError.message}`);
   const { error: insertError } = await supabase
     .from('payroll_run_lines')
     .insert(results.map(({ bundle, result }) => lineFromResult(run, bundle, result)));
@@ -267,7 +287,8 @@ export async function calculateRunCore(
       variances,
       calculated_at: new Date().toISOString(),
     })
-    .eq('id', run.id);
+    .eq('id', run.id)
+    .in('status', ['draft', 'calculated']);
   if (updateError) throw new Error(updateError.message);
 
   return { employees: results.length, totals, variances };

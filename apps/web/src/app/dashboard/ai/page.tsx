@@ -180,6 +180,15 @@ function PayslipForm({ options }: { options: Array<{ value: string; label: strin
     return askPayslip(prev, next);
   }
 
+  if (options.length === 0) {
+    return (
+      <p className="text-sm text-muted-foreground">
+        No finalized payslips yet — a payroll run must be approved before its
+        payslips can be explained.
+      </p>
+    );
+  }
+
   return (
     <AssistantForm
       action={askPayslipCombined}

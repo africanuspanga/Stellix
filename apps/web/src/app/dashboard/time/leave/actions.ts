@@ -131,6 +131,14 @@ export async function requestLeave(_p: LeaveFormState, f: FormData): Promise<Lea
   }
   if (endDate < startDate) return { error: 'End date must not be before the start date.' };
 
+  // time.leave.request alone is the base employee grant; without the approver
+  // grant you may only file for your OWN record (was: file for any colleague).
+  if (!auth.permissions.has('time.leave.approve')) {
+    const { data: own } = await supabase
+      .from('employees').select('id').eq('id', employeeId).eq('user_id', user.id).maybeSingle();
+    if (!own) return { error: 'You can only request leave for yourself.' };
+  }
+
   const [{ data: employee }, { data: leaveType }] = await Promise.all([
     supabase
       .from('employees')
@@ -292,15 +300,23 @@ export async function decideLeaveStep(_p: LeaveFormState, f: FormData): Promise<
       .select('*, leave_types(name), employees(user_id)')
       .eq('id', requestId)
       .maybeSingle();
-    if (request && request.status === 'pending') {
-      await supabase
-        .from('leave_requests')
-        .update({ status: result.status, decided_at: new Date().toISOString() })
-        .eq('id', requestId);
+    // Win the transition atomically: the guard `.eq('status','pending')` means
+    // only one of two concurrent approvers flips the row, so the ledger is
+    // debited exactly once (was: check-then-write → double debit under a race).
+    const { data: flipped } = request?.status === 'pending'
+      ? await supabase
+          .from('leave_requests')
+          .update({ status: result.status, decided_at: new Date().toISOString() })
+          .eq('id', requestId)
+          .eq('status', 'pending')
+          .select('id')
+          .maybeSingle()
+      : { data: null };
 
+    if (request && flipped) {
       if (result.status === 'approved') {
         // The ledger debit — the request only ever affects balance here.
-        await supabase.from('leave_ledger').insert({
+        const { error: ledgerError } = await supabase.from('leave_ledger').insert({
           tenant_id: tenantId,
           employee_id: request.employee_id,
           leave_type_id: request.leave_type_id,
@@ -310,6 +326,14 @@ export async function decideLeaveStep(_p: LeaveFormState, f: FormData): Promise<
           leave_request_id: requestId,
           created_by: user.id,
         });
+        if (ledgerError) {
+          // Never leave a request approved without its debit: roll back.
+          await supabase
+            .from('leave_requests')
+            .update({ status: 'pending', decided_at: null })
+            .eq('id', requestId);
+          return { error: `Balance update failed, approval reverted: ${ledgerError.message}` };
+        }
       }
 
       // Notify the requester and the employee (when they have portal access).
@@ -381,9 +405,29 @@ export async function cancelLeaveRequest(_p: LeaveFormState, f: FormData): Promi
   if (!['pending', 'approved'].includes(request.status)) {
     return { error: `A ${request.status} request cannot be cancelled.` };
   }
+  // Without the approver grant you may only cancel your OWN request.
+  if (!auth.permissions.has('time.leave.approve')) {
+    const { data: own } = await supabase
+      .from('employees').select('id').eq('id', request.employee_id).eq('user_id', user.id).maybeSingle();
+    if (!own) return { error: 'You can only cancel your own leave requests.' };
+  }
+
+  // Win the cancellation atomically against a concurrent cancel/approve: only
+  // flip if the row is still in the status we read. Otherwise the credit could
+  // be written twice (double credit) or the day lost.
+  const { data: flipped } = await supabase
+    .from('leave_requests')
+    .update({ status: 'cancelled', decided_at: new Date().toISOString() })
+    .eq('id', requestId)
+    .eq('status', request.status)
+    .select('id')
+    .maybeSingle();
+  if (!flipped) {
+    return { error: 'This request was just updated elsewhere — refresh and try again.' };
+  }
 
   if (request.status === 'approved') {
-    await supabase.from('leave_ledger').insert({
+    const { error: creditError } = await supabase.from('leave_ledger').insert({
       tenant_id: tenantId,
       employee_id: request.employee_id,
       leave_type_id: request.leave_type_id,
@@ -394,6 +438,14 @@ export async function cancelLeaveRequest(_p: LeaveFormState, f: FormData): Promi
       note: 'Approved leave cancelled — compensating credit',
       created_by: user.id,
     });
+    if (creditError) {
+      // Never lose the employee's days: roll the cancellation back.
+      await supabase
+        .from('leave_requests')
+        .update({ status: 'approved', decided_at: request.decided_at ?? null })
+        .eq('id', requestId);
+      return { error: `Balance restore failed, cancellation reverted: ${creditError.message}` };
+    }
   }
   if (request.workflow_instance_id) {
     await supabase
@@ -406,10 +458,7 @@ export async function cancelLeaveRequest(_p: LeaveFormState, f: FormData): Promi
       .eq('instance_id', request.workflow_instance_id)
       .in('status', ['pending', 'waiting']);
   }
-  await supabase
-    .from('leave_requests')
-    .update({ status: 'cancelled', decided_at: new Date().toISOString() })
-    .eq('id', requestId);
+  // (status already flipped atomically above)
 
   await logAudit(supabase, {
     tenantId, actorUserId: user.id, action: 'leave_request.cancelled',

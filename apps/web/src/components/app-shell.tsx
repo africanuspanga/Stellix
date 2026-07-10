@@ -11,12 +11,14 @@ export function AppShell({
 	tenants,
 	activeTenantId,
 	notifications = [],
+	isOwner = false,
 }: {
 	children: React.ReactNode;
 	user: NavUserInfo;
 	tenants: TenantOption[];
 	activeTenantId: string | null;
 	notifications?: NotificationItem[];
+	isOwner?: boolean;
 }) {
 	return (
 		<div className="overflow-hidden">
@@ -25,6 +27,7 @@ export function AppShell({
 				<SidebarInset className="md:peer-data-[variant=inset]:ml-0">
 					<AppHeader
 						activeTenantId={activeTenantId}
+						isOwner={isOwner}
 						notifications={notifications}
 						tenants={tenants}
 						user={user}

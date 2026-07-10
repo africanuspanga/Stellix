@@ -16,11 +16,13 @@ export function AppHeader({
   tenants,
   activeTenantId,
   notifications = [],
+  isOwner = false,
 }: {
   user: NavUserInfo;
   tenants: TenantOption[];
   activeTenantId: string | null;
   notifications?: NotificationItem[];
+  isOwner?: boolean;
 }) {
 	const pathname = usePathname();
 	// Longest matching route wins, so /dashboard/organization/branches
@@ -53,7 +55,7 @@ export function AppHeader({
 					className="h-4 data-[orientation=vertical]:self-center"
 					orientation="vertical"
 				/>
-				<NavUser user={user} />
+				<NavUser isOwner={isOwner} user={user} />
 			</div>
 		</header>
 	);

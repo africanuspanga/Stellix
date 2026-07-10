@@ -9,7 +9,10 @@ const latestChange = {
 	badge: "NEW",
 	title: "Payroll engine in build",
 	description: "Sprint 1 is underway.", // TIP: Use a single line of text for the description. (max 5 words)
-	readMore: { href: "#", label: "Release notes" },
+	readMore: {
+		href: "https://github.com/africanuspanga/Stellix/blob/main/docs/SPRINTS.md",
+		label: "Release notes",
+	},
 } as const;
 
 export function LatestChange() {

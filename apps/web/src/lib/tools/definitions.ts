@@ -24,7 +24,10 @@ registerTool({
     required: ['query'],
   },
   handler: async (ctx, input) => {
-    const q = String(input.query ?? '').trim();
+    // Strip PostgREST filter metacharacters so a crafted query can't restructure
+    // the OR group (commas/parens) — tenant scope is AND-ed so it can't escape
+    // the tenant, but this prevents broadened matches and parse errors.
+    const q = String(input.query ?? '').replace(/[,()*\\]/g, ' ').trim();
     if (!q) return { matches: [] };
     const { data } = await ctx.supabase
       .from('employees')
@@ -88,14 +91,18 @@ registerTool({
     },
   },
   handler: async (ctx, input) => {
-    let employeeId = input.employee_id ? String(input.employee_id) : null;
-    if (!employeeId) {
-      const { data: me } = await ctx.supabase
-        .from('employees')
-        .select('id')
-        .eq('user_id', ctx.userId)
-        .maybeSingle();
-      employeeId = (me?.id as string) ?? null;
+    const { data: me } = await ctx.supabase
+      .from('employees')
+      .select('id')
+      .eq('tenant_id', ctx.tenantId)
+      .eq('user_id', ctx.userId)
+      .maybeSingle();
+    const ownId = (me?.id as string) ?? null;
+
+    const employeeId = input.employee_id ? String(input.employee_id) : ownId;
+    // Reading someone else's balance requires the approver permission.
+    if (employeeId !== ownId && !ctx.permissions.has('time.leave.approve')) {
+      return { error: 'You can only check your own leave balance.' };
     }
     if (!employeeId) return { error: 'No employee record found for this user.' };
 

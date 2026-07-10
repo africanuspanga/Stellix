@@ -50,7 +50,10 @@ export async function getPayrollInputs(
 ): Promise<EntityPayrollInputs[]> {
   const mm = String(period.month).padStart(2, '0');
   const lastDay = new Date(Date.UTC(period.year, period.month, 0)).getUTCDate();
-  const periodEnd = `${period.year}-${mm}-${lastDay}`;
+  const periodEnd = `${period.year}-${mm}-${String(lastDay).padStart(2, '0')}`;
+  // Compensation/components in force at period end (see run-calc.ts) — not
+  // "whatever is open now", which would pay future-dated raises early.
+  const inForceAtPeriodEnd = `effective_to.is.null,effective_to.gte.${periodEnd}`;
 
   const [{ data: employees }, { data: compensation }, { data: assignments }] =
     await Promise.all([
@@ -62,11 +65,13 @@ export async function getPayrollInputs(
       supabase
         .from('employee_compensation')
         .select('employee_id, basic_salary')
-        .is('effective_to', null),
+        .lte('effective_from', periodEnd)
+        .or(inForceAtPeriodEnd),
       supabase
         .from('employee_pay_components')
         .select('employee_id, amount, pay_components(code, name, component_type, calc_type, default_amount, taxable, pensionable, is_active)')
-        .is('effective_to', null),
+        .lte('effective_from', periodEnd)
+        .or(inForceAtPeriodEnd),
     ]);
 
   const salaryByEmployee = new Map(

@@ -56,8 +56,11 @@ export async function acceptInvite(
   if (!employee) throw new Error('The employee record behind this invite no longer exists.');
   if (employee.user_id) throw new Error('This employee already has portal access — just sign in.');
 
+  // Prefer the email HR put on the employee record — the client-supplied
+  // address is only a fallback when none is on file, so a leaked token can't
+  // bind the account to an attacker's own email.
   const email =
-    input.email?.trim() || employee.work_email || employee.personal_email || '';
+    employee.work_email || employee.personal_email || input.email?.trim() || '';
   if (!email) throw new Error('Enter an email address to use for signing in.');
 
   const { data: created, error: createError } = await admin.auth.admin.createUser({

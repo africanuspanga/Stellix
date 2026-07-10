@@ -24,8 +24,14 @@ export async function signIn(
   if (error) return { error: error.message };
 
   revalidatePath('/', 'layout');
-  const next = String(formData.get('next') ?? '') || '/dashboard';
-  redirect(next.startsWith('/') ? next : '/dashboard');
+  // Only allow same-origin relative paths. Reject protocol-relative ('//evil')
+  // and backslash tricks ('/\evil') that the browser treats as absolute URLs.
+  const next = String(formData.get('next') ?? '');
+  const safeNext =
+    next.startsWith('/') && !next.startsWith('//') && !next.startsWith('/\\')
+      ? next
+      : '/dashboard';
+  redirect(safeNext);
 }
 
 /** One-click sign-in to the Driftmark Technologies demo workspace. The

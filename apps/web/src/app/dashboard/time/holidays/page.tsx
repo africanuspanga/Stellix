@@ -76,6 +76,14 @@ export default async function HolidaysPage() {
           </TableRow>
         </TableHeader>
         <TableBody>
+          {combined.length === 0 && (
+            <TableRow>
+              <TableCell className="py-8 text-center text-muted-foreground" colSpan={4}>
+                No holidays configured yet. National holidays load with the
+                compliance seed; add company-specific days above.
+              </TableCell>
+            </TableRow>
+          )}
           {combined.map((h, i) => (
             <TableRow key={`${h.date}-${i}`}>
               <TableCell className="font-mono text-xs">{h.date}</TableCell>
