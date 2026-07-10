@@ -5,11 +5,39 @@ import type { SupabaseClient } from '@supabase/supabase-js';
 // employee role. Runs with the service-role client (the visitor has no
 // session yet). Framework-free — the accept action and E2E share it.
 
+/** Details the new hire completes about themselves during self-onboarding.
+ *  All optional — the person fills what they can; HR sees it land on the record. */
+export interface EmployeeProfileInput {
+  dateOfBirth?: string;
+  gender?: string;
+  maritalStatus?: string;
+  personalEmail?: string;
+  phone?: string;
+  physicalAddress?: string;
+  nationalId?: string; // NIDA
+  tin?: string;
+  nssfNumber?: string;
+  // Emergency contact
+  emergencyName?: string;
+  emergencyRelationship?: string;
+  emergencyPhone?: string;
+  // Payout details
+  paymentMethod?: string; // bank | mobile_money
+  bankName?: string;
+  bankBranch?: string;
+  accountName?: string;
+  accountNumber?: string;
+  mobileMoneyProvider?: string;
+  mobileMoneyNumber?: string;
+}
+
 export interface AcceptInviteInput {
   token: string;
   password: string;
   /** Fallback when the employee record has no email on file. */
   email?: string;
+  /** Self-service profile completion (self-onboarding). */
+  profile?: EmployeeProfileInput;
 }
 
 export interface AcceptInviteResult {
@@ -92,7 +120,72 @@ export async function acceptInvite(
       .from('user_roles')
       .insert({ tenant_id: tenantId, user_id: userId, role_id: employeeRole.id });
   }
-  await admin.from('employees').update({ user_id: userId }).eq('id', employee.id);
+  // ── Self-onboarding: write what the new hire filled in about themselves ──
+  // Runs with the service role but is scoped to this one employee id, so it
+  // only ever touches the record the invite belongs to.
+  const p = input.profile;
+  if (p) {
+    const clean = (v?: string) => {
+      const t = v?.trim();
+      return t ? t : undefined;
+    };
+    const employeeUpdate: Record<string, unknown> = { user_id: userId };
+    const set = (col: string, v?: string) => {
+      const c = clean(v);
+      if (c !== undefined) employeeUpdate[col] = c;
+    };
+    set('date_of_birth', p.dateOfBirth);
+    if (p.gender === 'male' || p.gender === 'female') employeeUpdate.gender = p.gender;
+    set('marital_status', p.maritalStatus);
+    set('personal_email', p.personalEmail);
+    set('phone', p.phone);
+    set('physical_address', p.physicalAddress);
+    set('national_id', p.nationalId);
+    set('tin', p.tin);
+    set('nssf_number', p.nssfNumber);
+    await admin.from('employees').update(employeeUpdate).eq('id', employee.id);
+
+    // Emergency contact → dependants (only if a name was given).
+    if (clean(p.emergencyName)) {
+      await admin.from('employee_dependants').insert({
+        tenant_id: tenantId,
+        employee_id: employee.id,
+        full_name: clean(p.emergencyName),
+        relationship: clean(p.emergencyRelationship) ?? 'other',
+        phone: clean(p.emergencyPhone) ?? null,
+        is_emergency_contact: true,
+      });
+    }
+
+    // Payout details → primary bank account (only if enough was given).
+    const method = p.paymentMethod === 'mobile_money' ? 'mobile_money' : 'bank';
+    const hasBank = method === 'bank' && clean(p.accountNumber);
+    const hasMomo = method === 'mobile_money' && clean(p.mobileMoneyNumber);
+    if (hasBank || hasMomo) {
+      const { data: existingBank } = await admin
+        .from('employee_bank_accounts')
+        .select('id')
+        .eq('employee_id', employee.id)
+        .limit(1);
+      if ((existingBank?.length ?? 0) === 0) {
+        await admin.from('employee_bank_accounts').insert({
+          tenant_id: tenantId,
+          employee_id: employee.id,
+          payment_method: method,
+          bank_name: clean(p.bankName) ?? null,
+          bank_branch: clean(p.bankBranch) ?? null,
+          account_name: clean(p.accountName) ?? `${employee.first_name} ${employee.last_name}`,
+          account_number: clean(p.accountNumber) ?? null,
+          mobile_money_provider: clean(p.mobileMoneyProvider) ?? null,
+          mobile_money_number: clean(p.mobileMoneyNumber) ?? null,
+          is_primary: true,
+        });
+      }
+    }
+  } else {
+    await admin.from('employees').update({ user_id: userId }).eq('id', employee.id);
+  }
+
   await admin
     .from('employee_invites')
     .update({ accepted_at: new Date().toISOString(), accepted_user_id: userId })
