@@ -1,71 +1,101 @@
 import Link from "next/link";
 import { PILLARS } from "@hr/config";
+import { Header } from "@/components/header";
+import { HeroSection } from "@/components/hero";
 import { LogoIcon } from "@/components/logo";
-import { Button } from "@/components/ui/button";
-
-const PILLAR_DESCRIPTIONS: Record<string, string> = {
-  people: "Employees, recruitment, onboarding, performance and offboarding",
-  time: "Attendance, leave, shifts, rostering and timesheets",
-  payroll: "Compensation, calculations, payments, loans and accounting",
-  compliance: "Statutory rules, labour compliance, filings, privacy and safety",
-  experience: "Web, mobile, WhatsApp, self-service and HR support",
-  ai: "Explanations, insights, automation and decision support",
-};
+import { productLinks } from "@/components/nav-links";
 
 export default function Home() {
-  const supabaseConfigured = Boolean(process.env.NEXT_PUBLIC_SUPABASE_URL);
-  const aiConfigured = Boolean(process.env.MOONSHOT_API_KEY);
-
   return (
-    <main className="mx-auto flex w-full max-w-5xl flex-1 flex-col gap-12 px-6 py-16">
-      <header className="flex flex-col gap-4">
-        <div className="flex items-center gap-2">
-          <LogoIcon className="size-6" />
-          <span className="text-lg font-bold tracking-tight">Stellix</span>
-        </div>
-        <p className="text-sm font-medium uppercase tracking-widest text-muted-foreground">
-          Powering Africa&apos;s Workforce
-        </p>
-        <h1 className="text-4xl font-bold tracking-tight sm:text-5xl">
-          The AI-native workforce &amp; payroll operating system
-        </h1>
-        <p className="max-w-2xl text-lg text-muted-foreground">
-          Manage employees from hiring to exit, automate compliant payroll,
-          control attendance and shifts, and give every worker access through
-          web, mobile and WhatsApp.
-        </p>
-        <div>
-          <Button render={<Link href="/dashboard" />} nativeButton={false}>
-            Open dashboard
-          </Button>
-        </div>
-      </header>
+    <div className="relative flex min-h-svh flex-col">
+      <Header />
 
-      <section className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-        {PILLARS.map((pillar) => (
-          <div key={pillar.key} className="rounded-xl border border-border p-5">
-            <h2 className="font-semibold">{pillar.en}</h2>
-            <p className="text-sm text-muted-foreground">{pillar.sw}</p>
-            <p className="mt-2 text-sm text-muted-foreground">
-              {PILLAR_DESCRIPTIONS[pillar.key]}
+      <main className="flex-1">
+        <HeroSection />
+
+        {/* Six pillars — one platform, the whole employee lifecycle. */}
+        <section className="mx-auto w-full max-w-5xl px-4 py-20" id="pillars">
+          <div className="mb-10 flex flex-col gap-2">
+            <p className="font-mono text-xs uppercase tracking-widest text-muted-foreground">
+              The platform
             </p>
+            <h2 className="max-w-xl text-balance font-semibold text-3xl tracking-tight md:text-4xl">
+              Six pillars. One employee record. Zero spreadsheets.
+            </h2>
           </div>
-        ))}
-      </section>
+          <div className="grid gap-px overflow-hidden rounded-xl border bg-border sm:grid-cols-2 lg:grid-cols-3">
+            {PILLARS.map((pillar, i) => {
+              const nav = productLinks[i];
+              return (
+                <div
+                  className="flex flex-col gap-2 bg-background p-6 transition-colors hover:bg-muted/50"
+                  key={pillar.key}
+                >
+                  <div className="text-foreground [&_svg]:size-5">
+                    {nav?.icon}
+                  </div>
+                  <h3 className="font-medium">{pillar.en}</h3>
+                  <p className="text-sm text-muted-foreground">
+                    {nav?.description}
+                  </p>
+                  <p className="mt-auto pt-2 font-mono text-xs text-muted-foreground">
+                    {pillar.sw}
+                  </p>
+                </div>
+              );
+            })}
+          </div>
+        </section>
 
-      <section className="rounded-xl border border-border p-5 text-sm">
-        <h2 className="mb-3 font-semibold">Platform setup status</h2>
-        <ul className="flex flex-col gap-2 text-muted-foreground">
-          <li>
-            {supabaseConfigured ? "●" : "○"} Supabase —{" "}
-            {supabaseConfigured ? "connected, migrations applied" : "awaiting credentials"}
-          </li>
-          <li>
-            {aiConfigured ? "●" : "○"} Moonshot Kimi AI —{" "}
-            {aiConfigured ? "configured" : "awaiting MOONSHOT_API_KEY"}
-          </li>
-        </ul>
-      </section>
-    </main>
+        {/* Compliance band — the reason to trust the payroll. */}
+        <section className="border-y bg-muted/30">
+          <div className="mx-auto flex w-full max-w-5xl flex-col gap-8 px-4 py-16 md:flex-row md:items-center md:justify-between">
+            <div className="flex max-w-xl flex-col gap-2">
+              <p className="font-mono text-xs uppercase tracking-widest text-muted-foreground">
+                Built for Tanzania
+              </p>
+              <h2 className="text-balance font-semibold text-2xl tracking-tight md:text-3xl">
+                Statutory rules as versioned data — never hard-coded.
+              </h2>
+              <p className="text-sm text-muted-foreground md:text-base">
+                Effective-dated compliance packs for Mainland and Zanzibar.
+                Deterministic payroll with a full calculation trace, immutable
+                once approved. AI explains every line — it never calculates pay.
+              </p>
+            </div>
+            <ul className="grid shrink-0 grid-cols-2 gap-x-10 gap-y-3 font-mono text-sm md:grid-cols-1">
+              <li>PAYE</li>
+              <li>NSSF</li>
+              <li>SDL</li>
+              <li>WCF</li>
+            </ul>
+          </div>
+        </section>
+      </main>
+
+      <footer className="mx-auto flex w-full max-w-5xl flex-col gap-6 px-4 py-12 sm:flex-row sm:items-center sm:justify-between">
+        <div className="flex items-center gap-2">
+          <LogoIcon className="size-5" />
+          <span className="font-semibold tracking-tight">Stellix</span>
+          <span className="text-sm text-muted-foreground">
+            — Powering Africa&apos;s Workforce
+          </span>
+        </div>
+        <nav className="flex items-center gap-5 text-sm text-muted-foreground">
+          <Link className="hover:text-foreground" href="/login">
+            Sign in
+          </Link>
+          <Link className="hover:text-foreground" href="/signup">
+            Create workspace
+          </Link>
+          <a
+            className="hover:text-foreground"
+            href="https://github.com/africanuspanga/Stellix"
+          >
+            GitHub
+          </a>
+        </nav>
+      </footer>
+    </div>
   );
 }
