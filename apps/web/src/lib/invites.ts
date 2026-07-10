@@ -19,6 +19,18 @@ export interface AcceptInviteResult {
   email: string;
 }
 
+/** True when the invite row is missing, already used, or past its expiry.
+ *  Shared by the public invite page and the accept flow. */
+export function isInviteInvalid(
+  invite: { accepted_at: string | null; expires_at: string } | null,
+): boolean {
+  return (
+    !invite ||
+    invite.accepted_at !== null ||
+    new Date(invite.expires_at).getTime() < Date.now()
+  );
+}
+
 export async function acceptInvite(
   admin: SupabaseClient,
   input: AcceptInviteInput,

@@ -120,7 +120,7 @@ try {
     .eq('cycle_id', cycle!.id).eq('title', 'Visit 40 client sites');
   const { data: goalStates } = await client.from('performance_goals')
     .select('status').eq('cycle_id', cycle!.id).order('title');
-  check('goal status tracked', goalStates?.some((g) => g.status === 'achieved'));
+  check('goal status tracked', goalStates?.some((g) => g.status === 'achieved') ?? false);
 
   const { error: reviewErr } = await client.from('performance_reviews').insert({
     tenant_id: tenantId, cycle_id: cycle!.id, employee_id: hired!.id,

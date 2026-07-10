@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { createAdminClient } from "@/lib/supabase/admin";
+import { isInviteInvalid } from "@/lib/invites";
 import { AuthCard } from "@/components/auth/auth-card";
 import { AcceptInviteForm } from "@/components/auth/accept-invite-form";
 
@@ -25,10 +26,9 @@ export default async function InvitePage({
   } | null;
   const tenant = invite?.tenants as { name?: string } | null;
 
-  const invalid =
-    !invite ||
-    invite.accepted_at !== null ||
-    new Date(invite.expires_at as string).getTime() < Date.now();
+  const invalid = isInviteInvalid(
+    invite as { accepted_at: string | null; expires_at: string } | null,
+  );
 
   if (invalid) {
     return (

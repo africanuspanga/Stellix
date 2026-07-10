@@ -86,7 +86,7 @@ try {
     return emp!.id as string;
   }
   const empB = await hire('EMP-0001', 'Bahati', 900_000, userB);
-  const empC = await hire('EMP-0002', 'Cecilia', 1_100_000, userC);
+  await hire('EMP-0002', 'Cecilia', 1_100_000, userC);
 
   // ── Payroll privacy ─────────────────────────────────────────────────────
   const { data: run } = await clientA.from('payroll_runs')
