@@ -1,8 +1,13 @@
 # Stellix Administrator's Guide
 
-> How the whole system works, for the person running it. v1 · 2026-07-08.
-> Screens referenced by their sidebar names. Everything here exists and is
-> tested — no roadmap items. Swahili terms shown where employees see them.
+> How the whole system works, for the person running a **company workspace**
+> (a customer's HR/payroll admin). Screens referenced by their sidebar names.
+> Everything here exists and is tested — no roadmap items. Swahili terms shown
+> where employees see them.
+>
+> **Are you the Stellix platform owner (the SaaS operator)?** Read
+> **`OWNER-GUIDE.md`** instead — it covers your `/owner` console, the whole
+> architecture, and operations. This guide is what your *customers* use.
 
 ---
 
@@ -206,6 +211,12 @@ flags and approval — feeds project costing.
    each *filed*/*paid* with the receipt reference as you go.
 9. **Close** the run. Payslips are live for employees in My space.
 
+**Make payslips yours:** Settings → **Payslip branding** — pick one of four
+templates (Modern, Classic, Minimal, Bold), set two brand colours, and upload
+your logo. A live preview shows the result; every payslip your team downloads
+(as a PDF via the print button) then carries your company's identity, not
+Stellix's. Needs the *manage tenant settings* permission.
+
 **Where the numbers come from:** basic salary (effective-dated) + assigned
 pay components + one-off run inputs → gross; statutory amounts come from the
 versioned **compliance rules** (never hard-coded); PAYE is computed on
@@ -267,6 +278,16 @@ answer) under the AI audit trail.
   can only ask about their own payslips — the database guarantees it.
 - **Payroll review notes** (payroll staff only): turns a run's variance
   findings into prioritized review notes before approval.
+
+**The Stellix agent** (AI → assistant page, "acts with your permissions"): a
+step beyond the read-only assistants. It can *do* things — but only what **you**
+could do, with **your** permissions. Ask "how many people are on leave?" and it
+queries the real data; ask it to "raise a bank-change request for me" and it
+does. Reads run freely; changes that write data come back as **proposals you
+confirm**; payroll approval and payments are **always human-only** and the agent
+cannot touch them. An admin sets, per action, how much autonomy the AI has (off
+→ read/draft → propose → act) — think of it as delegating to a new employee.
+Every agent action is logged with what it did and on whose behalf.
 
 Ask in English or Swahili; it answers in kind.
 
