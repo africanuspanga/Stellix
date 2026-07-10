@@ -13,6 +13,15 @@ Tanzania AI-native workforce & payroll operating system. Blueprint: `docs/BLUEPR
 - `pnpm build` / `pnpm lint`
 - Migrations: apply in filename order with `psql "$SUPABASE_DB_URL" -f <file>` (or `supabase db push` once the CLI is linked).
 
+## AI-native rules (docs/AI-NATIVE.md)
+- Every new business operation registers a tool in `apps/web/src/lib/tools/`
+  (name, description, typed inputs, permission, risk level). Buttons and
+  agents share that one code path via `executeTool()` — never fork logic.
+- Risk-3 operations (money, termination) are `humanOnly` — enforced in code.
+- Meaningful writes emit a `domain_events` fact (`emits:` on the tool, or
+  `emitEvent()` in the action).
+- Facts (numbers, balances, pay) reach the model only through tool results.
+
 ## Database rules
 - Every tenant-scoped table: `tenant_id uuid not null` + RLS policy via `app.current_tenant_id()`.
 - Statutory rates live in `compliance_rules` (effective-dated, versioned) — never in code.

@@ -4,7 +4,7 @@ import { createClient } from "@/lib/supabase/server";
 import { getTenancyContext } from "@/lib/tenancy/context";
 import { getUserPermissions } from "@/lib/authz";
 import { fullName, getEmployees } from "@/lib/people/queries";
-import { askAnomalies, askPayslip, askPolicy } from "@/app/dashboard/ai/actions";
+import { askAgent, askAnomalies, askPayslip, askPolicy } from "@/app/dashboard/ai/actions";
 import { AssistantForm } from "@/components/ai/assistant-form";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -68,6 +68,29 @@ export default async function AiAssistantPage() {
           trail with its data sources. Ask in English or Swahili.
         </p>
       </div>
+
+      <Card className="shadow-none">
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            Stellix agent
+            <Badge variant="outline">acts with your permissions</Badge>
+          </CardTitle>
+          <p className="text-xs text-muted-foreground">
+            Plans and acts through the same permission-checked operations the
+            buttons use. Reads run freely; writes become proposals for you to
+            confirm; payroll approval and payments always stay human. Try
+            &ldquo;how many people are on leave?&rdquo; or &ldquo;raise a bank
+            change request for me&rdquo;.
+          </p>
+        </CardHeader>
+        <CardContent>
+          <AssistantForm
+            action={askAgent}
+            questionPlaceholder="e.g. Find Juma's latest payslip and explain the PAYE"
+            submitLabel="Ask the agent"
+          />
+        </CardContent>
+      </Card>
 
       <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
         <Card className="shadow-none">

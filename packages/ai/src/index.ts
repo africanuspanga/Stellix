@@ -12,6 +12,38 @@ export interface ChatMessage {
   content: string;
 }
 
+// ── Tool calling (OpenAI-compatible) ─────────────────────────────────────
+export interface ToolCall {
+  id: string;
+  type: 'function';
+  function: { name: string; arguments: string };
+}
+
+export interface AssistantToolMessage {
+  role: 'assistant';
+  content: string | null;
+  tool_calls?: ToolCall[];
+}
+
+export interface ToolResultMessage {
+  role: 'tool';
+  tool_call_id: string;
+  content: string;
+}
+
+/** Message union for agent conversations (system/user/assistant/tool). */
+export type AgentMessage = ChatMessage | AssistantToolMessage | ToolResultMessage;
+
+export interface ModelToolSpec {
+  type: 'function';
+  function: { name: string; description: string; parameters: unknown };
+}
+
+export interface ToolChatResult {
+  content: string;
+  toolCalls: ToolCall[];
+}
+
 export interface KimiConfig {
   apiKey: string;
   baseUrl?: string;
@@ -65,5 +97,46 @@ export function createKimiClient(config?: Partial<KimiConfig>) {
     return data.choices[0]?.message?.content ?? '';
   }
 
-  return { chat, model };
+  /** Chat completion that lets the model call registered tools. The caller
+   *  executes each returned tool call (through the platform's permission-
+   *  checked executor) and loops with the results appended. */
+  async function chatWithTools(
+    messages: AgentMessage[],
+    tools: ModelToolSpec[],
+    options: ChatOptions = {},
+  ): Promise<ToolChatResult> {
+    const res = await fetch(`${baseUrl}/chat/completions`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${apiKey}`,
+      },
+      body: JSON.stringify({
+        model,
+        messages,
+        tools,
+        ...(options.temperature !== undefined ? { temperature: options.temperature } : {}),
+        max_tokens: options.maxTokens ?? 2048,
+      }),
+      signal: options.signal,
+    });
+
+    if (!res.ok) {
+      const body = await res.text().catch(() => '');
+      throw new Error(`Moonshot API error ${res.status}: ${body.slice(0, 500)}`);
+    }
+
+    const data = (await res.json()) as {
+      choices: Array<{
+        message: { content: string | null; tool_calls?: ToolCall[] };
+      }>;
+    };
+    const message = data.choices[0]?.message;
+    return {
+      content: message?.content ?? '',
+      toolCalls: message?.tool_calls ?? [],
+    };
+  }
+
+  return { chat, chatWithTools, model };
 }

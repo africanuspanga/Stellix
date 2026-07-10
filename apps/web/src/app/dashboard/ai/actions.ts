@@ -3,6 +3,7 @@
 import { createKimiClient } from '@hr/ai';
 import { requirePermission } from '@/lib/authz';
 import { explainPayslip, policyQA, summarizeRunAnomalies } from '@/lib/ai/assistants';
+import { runAgent } from '@/lib/ai/agent';
 
 export interface AiFormState {
   error?: string;
@@ -79,5 +80,37 @@ export async function askAnomalies(_p: AiFormState, f: FormData): Promise<AiForm
     return { answer: result.answer, sources: result.sources };
   } catch (e) {
     return { error: e instanceof Error ? e.message : 'The assistant is unavailable right now.' };
+  }
+}
+
+/** The Stellix agent (reactive mode): plans with Kimi, acts only through the
+ *  permission-checked tool registry, as the signed-in user. Controlled writes
+ *  become proposals awaiting confirmation (docs/AI-NATIVE.md). */
+export async function askAgent(_p: AiFormState, f: FormData): Promise<AiFormState> {
+  const auth = await requirePermission('ai.assistant.use');
+  if ('error' in auth) return { error: auth.error };
+
+  const question = str(f, 'question');
+  if (!question) return { error: 'Ask the agent something first.' };
+  if (question.length > 1000) return { error: 'Please keep the request under 1000 characters.' };
+
+  try {
+    const kimi = createKimiClient();
+    const result = await runAgent(auth.supabase, kimi.chatWithTools, {
+      tenantId: auth.tenantId,
+      userId: auth.user.id,
+      permissions: auth.permissions,
+      model: kimi.model,
+      question,
+    });
+    return {
+      answer: result.answer,
+      sources: result.actions.map((a) => ({
+        type: 'tool',
+        ref: `${a.tool} — ${a.status}${a.detail ? `: ${a.detail}` : ''}`,
+      })),
+    };
+  } catch (e) {
+    return { error: e instanceof Error ? e.message : 'The agent is unavailable right now.' };
   }
 }
