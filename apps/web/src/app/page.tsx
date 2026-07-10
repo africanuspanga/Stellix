@@ -81,12 +81,18 @@ export default function Home() {
             — Powering Africa&apos;s Workforce
           </span>
         </div>
-        <nav className="flex items-center gap-5 text-sm text-muted-foreground">
+        <nav className="flex flex-wrap items-center gap-5 text-sm text-muted-foreground">
           <Link className="hover:text-foreground" href="/login">
             Sign in
           </Link>
           <Link className="hover:text-foreground" href="/signup">
             Create workspace
+          </Link>
+          <Link className="hover:text-foreground" href="/privacy">
+            Privacy
+          </Link>
+          <Link className="hover:text-foreground" href="/terms">
+            Terms
           </Link>
           <a
             className="hover:text-foreground"

@@ -1,0 +1,71 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  web:
+    name: Lint · Typecheck · Golden payroll · Build
+    runs-on: ubuntu-latest
+    env:
+      # Dummy values so `next build` succeeds without live credentials.
+      NEXT_PUBLIC_SUPABASE_URL: https://placeholder.supabase.co
+      NEXT_PUBLIC_SUPABASE_ANON_KEY: placeholder-anon-key
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 10
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Lint
+        working-directory: apps/web
+        run: pnpm exec eslint . --max-warnings=10
+
+      - name: Typecheck
+        working-directory: apps/web
+        run: pnpm exec tsc --noEmit
+
+      - name: Golden payroll test suite
+        working-directory: apps/web
+        run: pnpm exec tsx scripts/golden-payroll.mts
+
+      - name: Build
+        working-directory: apps/web
+        run: pnpm exec next build
+
+  migrations:
+    name: Migration chain (0001 → latest)
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:17
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_DB: stellix_test
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U postgres"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Apply full chain + idempotency re-runs
+        env:
+          DATABASE_URL: postgres://postgres:postgres@localhost:5432/stellix_test
+        run: bash packages/database/scripts/test-migrations.sh
