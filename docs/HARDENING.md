@@ -52,6 +52,23 @@ application code was changed.
    and a `split_percentage` 0–100 check. Each is wrapped so pre-existing data
    cannot fail the migration.
 
+## Verification (runtime, not just review)
+
+The full chain `0001`→`0018` was executed against a scratch PostgreSQL 17
+instance (Supabase `auth`/`storage` schemas stubbed) — **all 18 migrations
+apply cleanly in order**, and `0018` was re-run to prove idempotency. The new
+policies were then functionally tested with simulated JWTs across two tenants:
+
+| Test | Result |
+| --- | --- |
+| Plain employee sees only their own bank row | ✓ |
+| HR sees all bank rows in their tenant, zero cross-tenant | ✓ |
+| Plain employee cannot update even their own bank row (changes go through the service desk `bank_change` flow — deliberate) | ✓ blocked |
+| HR can insert bank rows in-tenant, blocked cross-tenant | ✓ |
+| Forged `actor_user_id` on audit insert rejected; honest actor accepted | ✓ |
+| Second open compensation row / second primary bank account / `split_percentage` > 100 rejected | ✓ |
+| `0014` salary policies unchanged (own-salary read works, cross-tenant zero) | ✓ |
+
 ## Apply
 
 ```bash
@@ -64,6 +81,14 @@ SUPABASE_DB_URL=postgres://... packages/database/scripts/migrate.sh
 - **Unique NIDA per tenant** (`employees(tenant_id, national_id)` where not
   null) to block duplicate hires — deferred because the demo/stress seed may
   contain duplicate or placeholder national IDs; add after validating data.
+- **Composite tenant FKs.** Child-table FKs reference `employees(id)` alone,
+  and `with check` policies validate `tenant_id` membership only — so a writer
+  in tenant A can technically insert a child row (tenant A) that points at an
+  employee of tenant B. The row stays scoped to A (B never sees it), so this is
+  data-hygiene rather than a leak, but the airtight pattern is
+  `foreign key (tenant_id, employee_id) references employees (tenant_id, id)`
+  (needs a `unique (tenant_id, id)` on `employees`). Platform-wide change —
+  schedule it as its own migration.
 - **Tighten `employees` read** if colleague PII (national_id, DOB) should not be
   visible to every member — currently the whole tenant can read the directory.
 - Rotate the Supabase service-role key and Moonshot key if `apps/web/.env.local`
